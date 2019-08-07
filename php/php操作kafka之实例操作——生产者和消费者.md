@@ -1,4 +1,4 @@
-# php操作kafka之实例操作(生产者和消费者).md
+# php操作kafka之实例操作(生产者和消费者)
 
 [php kafka手册地址](https://arnaud.le-blanc.net/php-rdkafka/phpdoc/book.rdkafka.html)
 
