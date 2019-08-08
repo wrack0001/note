@@ -8,8 +8,6 @@
 >> - 但是在golang中并没有封装这个函数，这个需要我们自己去封装。
 >> 如果也是用循环的方式去判断变量是否存在，那是不是感觉很low，也就是这个原因引出了这篇文章
 
-- 此篇文章GitHub地址：https://github.com/wrack0001/note/blob/master/skill/%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0hashSet%20--%20%E5%BA%94%E7%94%A8%E7%AF%87.md
-
 1. 在php和golang中都适用，主要原理是判断key是否存在
 
 ```cassandraql
@@ -75,6 +73,8 @@
 1. 就是数的key与value调换，利用map和数组中的key的唯一性来判断 
 2. 判断key是否存在的时间复杂度是 O(1);
 
+
+[GitHub地址](https://github.com/wrack0001/note/blob/master/skill/%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0hashSet%20--%20%E5%BA%94%E7%94%A8%E7%AF%87.md)
 
 
 ###### *参考文献*
