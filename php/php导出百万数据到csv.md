@@ -19,8 +19,8 @@ student table
 | 字段        | 类型    |备注     |
 | :---       |:-------|:----    |
 | id        | int    |     |
-| student_no        | string    |     |
-| name        | string    |     |
+| student_no        | string    |  学生编号   |
+| name        | string    |   学生姓名  |
 | areaId        | int    |所属区域的id |
 | gradeId        | int    |年级ID  |
 | SchoolId        | int    |学校ID  |
@@ -108,11 +108,7 @@ School table  （100+条数据）
 
 ```
 
-
-**上面的问题**
-1.
-2.
-3.
+**上面的问题留给你自己思考吧，如果我这里用jion是否可以，或者说是否更好呢。欢迎留言......**
 
 
-[GitHub地址]()
+[GitHub地址](https://github.com/wrack0001/note/blob/master/php/php%E5%AF%BC%E5%87%BA%E7%99%BE%E4%B8%87%E6%95%B0%E6%8D%AE%E5%88%B0csv.md)
