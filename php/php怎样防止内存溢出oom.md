@@ -53,7 +53,7 @@
 
 **这个是自己封装的函数，在发表之前有略微的改动，如果自己不喜欢可以修改。**
 
-[GitHub地址]()
+[GitHub地址](https://github.com/wrack0001/note/blob/master/php/php%E6%80%8E%E6%A0%B7%E9%98%B2%E6%AD%A2%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BAoom.md)
 
 ---
 ***参考文献***
