@@ -53,7 +53,7 @@ School table  （100+条数据）
 **下面开始写代码**
 
 ```sql
-    
+<?php
     set_time_limit(0);      // 设置超时
     ini_set('memory_limit', '100M');       // 设置最大使用的内存
     
