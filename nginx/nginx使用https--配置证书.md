@@ -55,4 +55,4 @@
 
 ( 5 ) 通过 https 方式访问您的站点，测试站点证书的安装配置。如遇到证书不信任问题，请查看帮助视频。
 
-[GitHub地址]()
+[GitHub地址](https://github.com/wrack0001/note/blob/master/nginx/nginx%E4%BD%BF%E7%94%A8https--%E9%85%8D%E7%BD%AE%E8%AF%81%E4%B9%A6.md)
