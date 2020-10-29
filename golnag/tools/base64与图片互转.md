@@ -57,3 +57,5 @@ func base642img(base64Desc,filePath string) error  {
 	return ioutil.WriteFile(filePath, data, 0666)
 }
 ```
+
+[GitHub地址](https://github.com/wrack0001/note/blob/master/golnag/tools/base64%E4%B8%8E%E5%9B%BE%E7%89%87%E4%BA%92%E8%BD%AC.md)
