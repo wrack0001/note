@@ -10,11 +10,11 @@
 
 1. 在php和golang中都适用，主要原理是判断key是否存在
 
-```cassandraql
+```go
     // 在golang中可以这样
 
     type HashSet struct {
-        set map[interface{}｝]bool
+        set map[interface{}}]bool
     }
     
     func NewHashSet() *HashSet {
@@ -39,7 +39,7 @@
 
 ```
 
-```cassandraql
+```php
     // InArray 函数就简单的模拟了in_array 函数
     // 需要注意的是，在设置 $HashSet 的时候需要设置在key 中，
     // 例 ： 
