@@ -51,3 +51,5 @@ syslogd  3854    root  5w   REG        8,2  4247977        164316 /var/log/cron.
 解决办法：删除这些大数据文件，然后直接重启打开日志程序。
 
 我们上次出现这个问题的原因是，程序中的日志文件过大。大的日志文件加载到缓存中，导致rootfs占满。
+
+[GitHub地址](https://github.com/wrack0001/note/blob/master/linux/rootfs%E6%A0%B9%E7%9B%AE%E5%BD%95%E5%8D%A0%E6%BB%A1%E9%97%AE%E9%A2%98.md)
