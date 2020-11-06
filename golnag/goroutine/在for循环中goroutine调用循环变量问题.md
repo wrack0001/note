@@ -45,4 +45,4 @@
 >与变量**i**都没有任何关系了。所以打印出来的就是【3，2，1】
 
 
-[GitHub地址]()
+[GitHub地址](https://github.com/wrack0001/note/blob/master/golnag/goroutine/%E5%9C%A8for%E5%BE%AA%E7%8E%AF%E4%B8%ADgoroutine%E8%B0%83%E7%94%A8%E5%BE%AA%E7%8E%AF%E5%8F%98%E9%87%8F%E9%97%AE%E9%A2%98.md)
