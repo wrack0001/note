@@ -32,3 +32,5 @@
 | Benchmark_fmt_string_20   | sting+sting               | string    | 3258351    | 372.4 ns/op  | 直接使用 fmt.Sprintf("%v") 拼接 20个字符串                  |
 | Benchmark_fmt_string_20_s | sting+sting               | string    | 3328732    | 369.7 ns/op  | 直接使用 fmt.Sprintf("%s") 拼接 20个字符串                  |
 | Benchmark_StrAndStr_20    | sting+sting               | string    | 1000000000 | 0.3165 ns/op | 直接使用 + 拼接 20个字符串                                  |
+
+[UT代码地址](https://github.com/wrack0001/note/blob/master/golnag/%E6%80%A7%E8%83%BD%E7%AF%87/fmt%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90_test.go)
