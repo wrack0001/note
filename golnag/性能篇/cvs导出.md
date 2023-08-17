@@ -127,6 +127,8 @@ func (s *client) Writer(data []string) error {
 // Flush 数据Flush【不要等所有的数据都loading后再Flush】
 func (s *client) Flush() {
 	_, _ = s.rw.Write(s.buffer.Bytes())
+	// response := http.NewResponseController(s.rw)
+	// response.Flush()
 	// 数据Flush返回后重置buffer
 	s.buffer.Reset()
 	// 内存GC 【是否需要手动GC看机器本身内存大小】因为被动GC并不是实时触发
