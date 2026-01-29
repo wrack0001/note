@@ -13,6 +13,7 @@
 | **📚 AI技能与提示词 (Skills)** | https://github.com/anthropics/skills | Anthropic 官方提供的Agent技能库 |
 | **📚 AI技能与提示词 (Skills)** | https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills | Anthropic 关于Agent技能的工程博客文章 |
 | **📚 AI技能与提示词 (Skills)** | https://skills.sh/ | Agent技能目录网站 |
+| **📚 AI技能与提示词 (Skills)** | https://skillsmp.com/ | Agent技能目录网站 |
 | **📚 AI技能与提示词 (Skills)** | https://github.com/JushBJJ/Mr.-Ranedeer-AI-Tutor/blob/main/Mr_Ranedeer.txt | 可定制的AI导师提示词项目 |
 | **🤖 AI智能体 (Agents)** | https://github.com/zai-org/Open-AutoGLM | 开源的手机AI智能体模型与框架 |
 | **🤖 AI智能体 (Agents)** | https://github.com/yexia553/learn-agents-from-opencode | 从开源项目学习AI Agent的仓库 |
