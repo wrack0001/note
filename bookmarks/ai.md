@@ -10,6 +10,7 @@
 | **🔧 AI开发框架** | https://dspy.ai/ | 声明式AI应用框架（DSPy） |
 | **🔧 AI开发框架** | https://docs.langchain.com/oss/python/langchain/quickstart | LangChain 开发框架官方文档 |
 | **🔧 AI提示词** | https://github.com/langgptai/LangGPT | LangGPT — 让每个人都能创建高质量提示词！ |
+| **📚 AI Skills Doc** | https://claude.com/blog/equipping-agents-for-the-real-world-with-agent-skills | skills 工作原理介绍 |
 | **📚 AI技能与提示词 (Skills)** | https://github.com/anthropics/skills | Anthropic 官方提供的Agent技能库 |
 | **📚 AI技能与提示词 (Skills)** | https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills | Anthropic 关于Agent技能的工程博客文章 |
 | **📚 AI技能与提示词 (Skills)** | https://skills.sh/ | Agent技能目录网站 |
