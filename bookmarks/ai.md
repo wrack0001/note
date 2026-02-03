@@ -21,6 +21,7 @@
 | **🤖 AI智能体 (Agents)** | https://github.com/yexia553/learn-agents-from-opencode | 从开源项目学习AI Agent的仓库 |
 | **🤖 AI智能体 (Agents)** | https://github.com/anomalyco/opencode | 开源的AI编码智能体项目 |
 | **🤖 AI智能体 (Agents)** | https://opencode.ai/ | 开源AI编码智能体官方网站 |
+| **🤖 AI智能体 (Agents)** | https://github.com/emcie-co/parlant/ | 解决 LLM 智能体的合规与可控问题 |
 | **🧩 AI模型与微调** | https://research.memgpt.ai/ | 具有记忆管理功能的大语言模型系统 |
 | **🧩 AI模型与微调** | https://github.com/hiyouga/LLaMA-Factory/blob/main/README_zh.md | 一站式LLM微调框架 |
 | **🧩 AI模型与微调** | https://docs.bigmodel.cn/cn/guide/models/vlm/autoglm-phone | 智谱AutoGLM-Phone模型文档 |
