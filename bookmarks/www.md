@@ -129,7 +129,6 @@
 | Hulu | https://www.hulu.com/ | 美国主流流媒体，正版美剧、电影、综艺，支持直播电视，兼顾影视与实时电视内容 |
 | Prime Video | https://www.primevideo.com/ | 亚马逊旗下流媒体，Prime会员附赠，海量影视+独家原创内容，支持4K |
 | Twitch Creator Camp | https://creatorcamp.twitch.tv/ | Twitch主播专属平台，提供直播技巧、运营干货、流量扶持，助力主播成长 |
-| Bilibili国际版 | https://m.bilibili.tv/ | 中文视频平台的国际版，分享动画、游戏、生活类内容 |
 | Niconico | https://www.nicovideo.jp/ | 日本知名视频分享平台，特色是弹幕评论系统 |
 
 ## 八、社交&社区平台类
@@ -155,23 +154,6 @@
 | Runway | https://runwayml.com/ | AI视频创作平台，文生视频、视频编辑、画面修复、字幕生成，短视频/创意视频核心工具 |
 | Claude | https://www.anthropic.com/index/claude-3 | Anthropic旗下AI助手，Claude 3 Opus/Sonnet，长文本处理、多模态分析，隐私性优于ChatGPT |
 
-## 十、职场协作类
-| 网站 | 网址 | 核心功能 |
-|------|------|----------|
-| Slack | https://slack.com/ | 全球顶级团队协作工具，即时通讯、频道分类、文件共享、第三方工具集成，海外企业核心工具 |
-| Microsoft 365 | https://www.office.com/ | 微软办公全家桶云端版，Word/Excel/PPT+OneDrive+Teams，一站式云端办公与团队协作 |
-| Google Workspace | https://workspace.google.com/ | 谷歌云端办公套件，Gmail/Docs/Sheets+Google Drive，海外中小企业/个人办公首选，实时协作 |
-| Asana | https://asana.com/ | 专业项目管理工具，任务分配、进度跟踪、甘特图，适配项目制工作，替代飞书项目 |
-| Trello | https://trello.com/ | 看板式项目管理工具，卡片式任务管理、拖拽式操作，适合轻量项目/个人待办管理 |
-| Zoom | https://zoom.us/ | 全球顶级视频会议工具，高清会议、直播、屏幕共享、跨平台适配，远程办公/线上学习核心工具 |
-
-## 十一、云存储&生产力类
-| 网站 | 网址 | 核心功能 |
-|------|------|----------|
-| Google Drive | https://drive.google.com/ | 谷歌云存储，免费15GB空间，文件存储/同步/实时协作，与Google Workspace无缝衔接 |
-| Dropbox | https://www.dropbox.com/ | 海外主流云存储，主打安全性，文件存储、同步、共享，企业/个人均适用 |
-| OneDrive | https://onedrive.live.com/ | 微软云存储，与Windows/微软365无缝衔接，免费5GB空间，文件同步、共享、云端编辑 |
-| Obsidian | https://obsidian.md/ | 本地知识库工具，Markdown编辑、双向链接、图谱视图，无云端依赖，适合深度思考/知识管理 |
 
 ## 十二、特色有趣类
 | 网站 | 网址 | 核心功能 |
