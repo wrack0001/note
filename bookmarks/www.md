@@ -153,19 +153,3 @@
 | MidJourney | https://www.midjourney.com/ | 全球顶级AI绘画平台，生成高精度艺术画/设计稿，设计师核心工具，需通过Discord使用 |
 | Runway | https://runwayml.com/ | AI视频创作平台，文生视频、视频编辑、画面修复、字幕生成，短视频/创意视频核心工具 |
 | Claude | https://www.anthropic.com/index/claude-3 | Anthropic旗下AI助手，Claude 3 Opus/Sonnet，长文本处理、多模态分析，隐私性优于ChatGPT |
-
-
-## 十二、特色有趣类
-| 网站 | 网址 | 核心功能 |
-|------|------|----------|
-| AirPano | https://www.airpano.com/ | 360°全景航拍，足不出户环游世界 |
-| A Soft Murmur | https://asoftmurmur.com/ | 白噪音生成器，提升专注与睡眠质量 |
-| Weavesilk | https://weavesilk.com/ | 创意绘图工具，轻松绘制对称艺术图案 |
-| Art Breeder | https://www.artbreeder.com/ | AI艺术生成平台，创造独特视觉作品 |
-| The Useless Web | https://theuselessweb.com/ | 随机访问有趣但无用的网站，探索网络奇趣 |
-| GeoGuessr | https://www.geoguessr.com/ | 地理知识游戏，通过街景图片猜测地点，提升地理认知 |
-| Instructables | https://www.instructables.com/ | DIY教程平台，学习制作各种创意项目和手工制品 |
-| Radio Garden | https://radio.garden/ | 全球电台地图，收听来自世界各地的广播电台 |
-| Wait But Why | https://waitbutwhy.com/ | 趣味知识博客，用幽默方式解释复杂概念和科学问题 |
-| One Zoom | https://www.onezoom.org/ | 交互式生命树，可视化展示地球上所有生物的进化关系 |
-| Neave Interactive | https://neave.com/ | 创意互动网站集合，包括音乐、游戏和视觉艺术项目 |
