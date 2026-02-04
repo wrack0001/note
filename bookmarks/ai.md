@@ -34,5 +34,7 @@
 | **💻 AI编程工具** | https://www.codebuddy.ai/ | 腾讯云推出的AI代码助手 |
 | **✍️ AI写作工具** | https://www.feifan.space/ | 非凡写作工具 |
 | **✍️ AI写作工具** | https://github.com/Anionex/banana-slides/ | 基于nano banana pro🍌的原生AI PPT生成应用 |
+| **✍️ AI图标工具** | https://github.com/DayuanJiang/next-ai-draw-io/ | AI驱动的图表创建工具 - 对话、绘制、可视化 |
+
 
 
