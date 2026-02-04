@@ -17,6 +17,7 @@
 | **📚 AI技能与提示词 (Skills)** | https://skillsmp.com/ | Agent技能目录网站 |
 | **📚 AI技能与提示词 (Skills)** | https://github.com/jwynia/agent-skills/ | Agent skills 收集者仓库 |
 | **📚 AI技能与提示词 (Skills)** | https://github.com/JushBJJ/Mr.-Ranedeer-AI-Tutor/blob/main/Mr_Ranedeer.txt | 可定制的AI导师提示词项目 |
+| **📚 AI技能与提示词 (Skills)** | https://github.com/Leey21/awesome-ai-research-writing/ | 别人分享的 prompt |
 | **🤖 AI智能体 (Agents)** | https://github.com/zai-org/Open-AutoGLM | 开源的手机AI智能体模型与框架 |
 | **🤖 AI智能体 (Agents)** | https://github.com/yexia553/learn-agents-from-opencode | 从开源项目学习AI Agent的仓库 |
 | **🤖 AI智能体 (Agents)** | https://github.com/anomalyco/opencode | 开源的AI编码智能体项目 |
