@@ -37,6 +37,8 @@
 | **✍️ AI写作工具** | https://github.com/Anionex/banana-slides/ | 基于nano banana pro🍌的原生AI PPT生成应用 |
 | **✍️ AI图标工具** | https://github.com/DayuanJiang/next-ai-draw-io/ | AI驱动的图表创建工具 - 对话、绘制、可视化 |
 | **✍️ AI claw** | https://github.com/qwibitai/nanoclaw/ ｜ https://github.com/HKUDS/nanobot| nanobot |
+| **✍️ AI claw** | https://github.com/openclaw/openclaw | openclaw |
+
 
 
 
