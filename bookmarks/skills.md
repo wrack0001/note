@@ -1,6 +1,9 @@
 
 代码简化器：`npx skills add https://github.com/simonwong/agent-skills --skill code-simplifier`
 
+golang 比较好的 skills https://github.com/samber/cc-skills-golang 
+npx skills add https://github.com/samber/cc-skills-golang --skill golang-modernize
+
 
 二、热门社区聚合 / 精选仓库
 composiohq/awesome-claude-skills（更新活跃）：https://github.com/composiohq/awesome-claude-skills
