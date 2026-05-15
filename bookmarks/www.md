@@ -62,6 +62,7 @@
 | GrammarlyGO | https://www.grammarly.com/go | 语法检查工具AI升级，AI润色、文案生成、邮件创作、英文写作辅助，职场/学习高频使用 |
 | Canva AI | https://www.canva.com/ai/ | 可画AI升级版本，AI生成海报、PPT、图片、文案，一站式AI设计+基础设计，新手友好 |
 | Notion AI | https://www.notion.so/ai | 原Notion升级AI版本，笔记+知识库+任务管理+AI创作，一站式AI生产力工具 |
+| Rectangle | https://rectangleapp.com/ | macOS 窗口管理工具，通过快捷键或拖拽边缘快速排列窗口，支持半屏/四分屏/全屏等布局，免费开源 |
 
 ## 四、资讯阅读类
 | 网站 | 网址 | 核心功能 |
