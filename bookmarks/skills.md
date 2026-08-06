@@ -8,3 +8,4 @@
 | 研发工作流 | superpowers（开发者超级技能） | - | https://github.com/obra/superpowers | 完整软件开发工作流体系，支持 TDD、子代理开发、代码评审等全流程 |
 | 网页数据处理 | web-search（全网搜索） | `npx skills add https://github.com/inference-sh-skills --skill web-search` | https://github.com/inference-sh-skills/skills | 联网关键词检索，获取网页标题、摘要与原始链接，提供信息检索来源 |
 | 网页数据处理 | web-content-fetcher（网页抓取） | `npx skills add https://github.com/shirenchuang/web-content-fetcher --skill web-content-fetcher` | https://github.com/shirenchuang/web-content-fetcher | 网页纯净正文提取，适配公众号/掘金/CSDN 等国内平台，自动过滤广告导航，输出标准 Markdown |
+| 研发工作流 | mattpocock/skills（Matt Pocock 技能合集） | `npx skills add mattpocock/skills` | https://github.com/mattpocock/skills | Matt Pocock 出品，51 个 Agent Skills 合集，覆盖 TDD、代码架构、Bug 诊断、工作流 handoff、需求转 PRD/Issues、写作辅助等全研发链路 |
