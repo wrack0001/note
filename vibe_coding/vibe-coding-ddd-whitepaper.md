@@ -511,7 +511,7 @@ Vibe Coding 的风险之一，是可用上下文没有明确表达模块边界�
 
 对方接口升级了，你需要改调用方。在无边界的代码里，循环调对方、协议转换、业务过滤全写在一起，改接口意味着同时改三件事——改完之后，业务逻辑有没有被顺手改歪，没人知道。**问题不是 AI 改不对接口，而是业务逻辑和接口适配缠在一起，AI 分不清边界。**
 
-领域只表达意图，外部系统的能力形状留在基础设施——这是 Ports & Adapters 与防腐层的老道理，第 4 章的代码对比就是它最完整的演示。Vibe Coding 语境下的增量在于：**对 AI 而言，稳定的 Port 可以降低外部变化牵动业务逻辑的风险。** 当领域契约不变、实现细节集中在 infra 时，接口适配就有了明确的修改落点，也减少了生成过程顺手改动业务规则的机会。约束再一次改变了 AI 的默认路径：外部接口变化优先落在 infra，而不是扩散到领域层。
+领域只表达意图，外部系统的协议与实现细节留在基础设施——这是 Ports & Adapters 的基本做法 [4]，DDD 中的防腐层也用于隔离外部模型。第 4 章的代码对比就是它最完整的演示。Vibe Coding 语境下的增量在于：**对 AI 而言，稳定的 Port 可以降低外部变化牵动业务逻辑的风险。** 当领域契约不变、实现细节集中在 infra 时，接口适配就有了明确的修改落点，也减少了生成过程顺手改动业务规则的机会。约束再一次改变了 AI 的默认路径：外部接口变化优先落在 infra，而不是扩散到领域层。
 
 ### 5.5 困境：AI 可能直接改字段，绕过校验 → 能力：充血模型与聚合入口
 
@@ -733,7 +733,7 @@ AI 在明确边界内生成实现，人确认边界本身有没有被踩、核�
 
 ### 8.2 趋势观察
 
-从 Eric Evans 鼓励 DDD 实践者实验 LLM，到 Martin Fowler 指出结构良好的软件对大模型同样更友好 [1][3]，再到曹偲提出的 Architecture Coding [4]——命名尚未统一，方向一致：做复杂系统的人，几乎都会走到"边界 + 生成"这条路上来。
+Eric Evans 鼓励 DDD 实践者实验 LLM [2]；Martin Fowler 指出，结构良好的软件也更便于 LLM 修改 [1]；Birgitta Böckeler 则把模块化、清晰边界、类型检查与测试列为降低 AI 编码风险的重要条件 [3]。曹偲分享的 Architecture Coding 实践进一步尝试用领域建模与确定性引擎约束代码生成 [5]。这些观点表述不同，但方向一致：生成速度越快，越需要用边界、模型和验证机制控制复杂度。
 
 当写代码不再是门槛，生成功能的成本趋近于零，竞争力从实现能力转向抽象、建模与复杂度管控。编码能力越廉价，建模能力越稀缺；生成速度越快，边界价值越高。
 
@@ -743,19 +743,14 @@ AI 在明确边界内生成实现，人确认边界本身有没有被踩、核�
 
 ### 理论与架构
 
-1. Martin Fowler. *Vibe Coding*. martinfowler.com, 2025. https://www.martinfowler.com/bliki/VibeCoding.html
-2. Eric Evans. *Explore DDD 2024*. YouTube, 2024. https://www.youtube.com/watch?v=Tll_suxZluk
-3. Martin Fowler. *To vibe or not to vibe*. martinfowler.com, 2025. https://martinfowler.com/articles/exploring-gen-ai/to-vibe-or-not-vibe.html
-4. 曹偲. *Architecture Coding*. InfoQ 中文, 2024. https://www.infoq.cn/article/32Cv9YDKevt9BZlFsRzM
-5. Alistair Cockburn. *Hexagonal Architecture*. alistair.cockburn.us. https://alistair.cockburn.us/hexagonal-architecture
+1. [Martin Fowler. *Vibe Coding*. martinfowler.com, 2026.](https://www.martinfowler.com/bliki/VibeCoding.html)
+2. [Eric Evans. *DDD and LLMs — Explore DDD 2024*. YouTube, 2024.](https://www.youtube.com/watch?v=Tll_suxZluk)
+3. [Birgitta Böckeler. *To vibe or not to vibe*. martinfowler.com, 2025.](https://martinfowler.com/articles/exploring-gen-ai/to-vibe-or-not-vibe.html)
+4. [Alistair Cockburn. *Hexagonal Architecture: The Original 2005 Article*. alistair.cockburn.us, 2005.](https://alistair.cockburn.us/hexagonal-architecture)
 
 ### 产业与实践
 
-6. Erik Schluntz. *Replacing my Right Hand with AI*. erikschluntz.com, 2024. https://erikschluntz.com/software/2024/07/30/code-with-ai.html
-7. Instinctools. *Vibe Coding for Enterprises*. instinctools.com, 2025. https://www.instinctools.com/blog/vibe-coding-enterprise/
-8. Menelaos Vergis. *Why DDD Is a Great Fit for Coding with Claude*. menelaos.vergis.net, 2025. https://menelaos.vergis.net/posts/Why-Domain-Driven-Design-Is-a-Great-Fit-for-Coding-with-Claude
-9. Djamel Bougouffa. *Hexagonal Architecture Is the Best Gift You Can Give an AI Agent*. djamel-bougouffa.com, 2025. https://djamel-bougouffa.com/blog/hexagonal-architecture-ai-agents/
-10. Glenn Eggleton. *If You're Using Cursor But Not DDD…*. glenneggleton.com, 2025. https://glenneggleton.com/war-stories/if-youre-using-cursor-but-not-ddd-youre-just-auto-completing-garbage-faster
+5. [曹偲. *从 Vibe Coding 到 Architecture Coding：Toco AI 建模驱动 AI Coding 实践*. InfoQ 中文, 2026.](https://www.infoq.cn/article/32Cv9YDKevt9BZlFsRzM)
 
 ---
 
