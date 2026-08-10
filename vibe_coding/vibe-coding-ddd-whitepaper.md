@@ -182,9 +182,16 @@ flowchart LR
 
 ```
 flowchart TD
-    I["interfaces<br/>协议转换"] --> A["application<br/>用例编排"]
-    A --> D["domain<br/>模型 / 规则 / Port"]
-    IF["infra<br/>仓储 / 外部适配"] -.实现.-> D
+    I["interfaces<br/>协议 ↔ DTO 转换"] --> A["application<br/>用例编排"]
+    A --> D["domain<br/>实体 / 规则 / Port"]
+    IF["infra<br/>仓储 / 外部客户端 / 消息消费"] -.实现.-> D
+    A -.持有接口.-> D
+    D -.- R["🔴 红线：domain 禁止 import<br/>ORM / 协议框架 / 缓存客户端"]
+    style I fill:#E3F2FD,color:#000
+    style A fill:#FFF9C4,color:#000
+    style D fill:#FFCCBC,color:#000
+    style IF fill:#C8E6C9,color:#000
+    style R fill:#FF6B6B,color:#fff
 ```
 
 **定义与成立前提**：一个仓库和部署单元内包含多个限界上下文，常以 `interfaces → application → domain ← infra` 组织依赖。interfaces 处理协议，application 编排用例，domain 承载模型、业务不变量与 Port，infra 实现仓储和外部适配；四层只是 DDD 的一种工程实现。
@@ -201,7 +208,7 @@ flowchart TD
 - **统一部署存在上限**：仓库增长后，构建、CI 和发布会变慢；故障隔离与扩缩容也以整体为单位。
 - **建模需要持续投入**：统一语言、限界上下文和业务不变量需要团队维护，简单 CRUD 使用全套 DDD 可能得不偿失。
 
-这些约束对人和 AI 同样有效。AI 的增量收益在于模块与接口让相关上下文更容易被发现，并把生成范围限制在可验证的结构内。
+人和 AI 都需要遵守模块边界和依赖规则。对 Vibe Coding 来说，清晰的目录、接口和依赖方向能帮助 AI 快速找到该改的位置，减少对其他模块的误改；修改后也更容易通过编译、测试和架构检查发现越界。
 
 **适用与不适用场景**：适合业务规则复杂、跨模块变化频繁，但暂时不需要独立部署的系统；不适合极简单业务，或必须严格隔离故障、独立扩缩容和团队发布节奏的模块。
 
