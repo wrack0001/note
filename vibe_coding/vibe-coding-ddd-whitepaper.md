@@ -300,101 +300,158 @@ Vibe Coding 可以快速生成这条完整链路，并在同一仓库中完成�
 
 ---
 
-## 4. 实战代码对比：AI 的复制本能 vs 分层约束
+## 4. 实战代码对比：同一跨模块需求在组合 A 与组合 C 中如何落地
 
-抽象对比容易流于口号，这里用一个反复出现的真实场景把差异摆到代码层面：领域需要"根据一批 UID 查询用户资料"，对方接口暂时只支持单 UID 查询。之后需求演进两次——先要求另一个入口保留封禁用户并标记状态而非直接过滤，再要求所有调用方切到对方新上线的批量接口。
+沿用第 3 章的案例：用户开通主播资格后，系统需要初始化资产账户、发送 IM 通知并创建直播间。这个需求涉及四个模块，但每个模块承担的业务含义不同：
 
-### 4.1 无边界版本：AI 的最快路径是复制
+| 模块 | 自己负责的规则 |
+|------|---------------|
+| 用户 | 判断用户是否具备主播资格，并记录主播身份 |
+| 资产 | 创建并维护主播的结算账户，保证重复调用不会创建多份 |
+| IM 消息 | 选择通知模板并发送开通结果 |
+| 直播 | 为主播创建唯一的默认直播间 |
 
-第一次对话交付的实现，把循环调用、协议转换与业务过滤全写在同一个方法里：
+跨模块流程由 application 组织，各模块只处理自己的模型和规则。下面不比较“好代码”和“坏代码”，而是比较同一需求在模块化 MVC 三层与模块化单体 DDD 中分别会把规则放在哪里。
 
-```
-func (s *UserService) GetProfiles(ctx context.Context, uids []int64) ([]*Profile, error) {
-    var result []*Profile
-    for _, uid := range uids {
-        resp, err := s.client.GetUser(ctx, &pb.GetUserReq{Uid: uid})
-        if err != nil {
-            continue
-        }
-        if resp.Status == pb.UserStatus_BANNED {
-            continue
-        }
-        result = append(result, &Profile{UID: resp.Uid, Nickname: resp.Nickname})
-    }
-    return result, nil
-}
-```
+### 4.1 组合 A：规则和流程都放在应用服务
 
-功能验证通过。当后台管理入口提出"要看到封禁用户并标记状态"时，对话里最快的路径是复制一份变体：
+模块化 MVC 可以通过公开模块接口完成协作，不需要直接访问其他模块的数据库。一个常见实现如下：
 
 ```
-func (s *UserService) GetProfilesForAdmin(ctx context.Context, uids []int64) ([]*ProfileWithStatus, error) {
-    var result []*ProfileWithStatus
-    for _, uid := range uids {
-        resp, err := s.client.GetUser(ctx, &pb.GetUserReq{Uid: uid})
-        if err != nil {
-            continue
-        }
-        result = append(result, &ProfileWithStatus{
-            UID: resp.Uid, Nickname: resp.Nickname, Banned: resp.Status == pb.UserStatus_BANNED,
-        })
-    }
-    return result, nil
-}
-```
-
-复制变体不是 AI 犯错，而是它在无结构代码库里的理性选择——对话上下文里没有"这段逻辑已存在于别处、应该复用"的信号，复制就是局部最优。真正的考验出现在对方接口升级为批量查询时：需要修改的不是一处，而是每一份复制过循环逻辑的地方。PR 里会出现大量结构相似又不完全相同的改动，审查者要逐一确认每处是否都改对。漏改一处，通常要等到那一处的调用路径出问题才会暴露。
-
-### 4.2 分层版本：契约稳定，改动落点唯一
-
-领域只声明意图，不关心对方一次能查几个：
-
-```
-// domain/user/port.go
-type ProfileFetcher interface {
-    FindByUIDs(ctx context.Context, uids []int64) ([]*Profile, error)
-}
-
-// domain/user/service.go
-func (s *Service) GetProfiles(ctx context.Context, uids []int64) ([]*Profile, error) {
-    profiles, err := s.fetcher.FindByUIDs(ctx, uids)
+// user/application/service.go
+func (s *Service) EnableStreamer(ctx context.Context, uid int64) error {
+    u, err := s.users.Find(ctx, uid)
     if err != nil {
-        return nil, err
+        return err
     }
-    return filterBanned(profiles), nil
+    if u.Status == StatusBanned {
+        return ErrUserBanned
+    }
+    if !u.RealNameVerified {
+        return ErrRealNameRequired
+    }
+
+    u.IsStreamer = true
+    if err := s.users.Save(ctx, u); err != nil {
+        return err
+    }
+    if err := s.assets.EnsureStreamerAccount(ctx, uid); err != nil {
+        return err
+    }
+    if err := s.live.EnsureDefaultRoom(ctx, uid); err != nil {
+        return err
+    }
+    return s.messages.SendStreamerEnabled(ctx, uid)
 }
 ```
 
-对方只支持单 UID 时，循环与协议转换是基础设施的事：
+这段代码符合组合 A：用户规则集中在应用服务，资产、直播和 IM 消息通过公开模块接口调用。对于入口少、规则稳定的项目，它足够直接，AI 也容易一次生成完整链路。
+
+问题出现在规则和入口继续增加时。假设运营后台、审核任务和批量迁移都能开通主播资格，新入口必须主动复用 `EnableStreamer`；如果某个入口直接修改 `IsStreamer`，或者复制实名认证与封禁判断，编译不会提示业务规则被绕过。组合 A 仍然可以靠接口可见性、测试和评审守住这些规则，但主要依赖团队持续维护约定。
+
+### 4.2 组合 C：领域模型守规则，application 只组织流程
+
+组合 C 先让用户上下文拥有主播资格规则，并禁止外部直接修改状态：
 
 ```
-// infra/profile_fetcher.go
-func (f *profileFetcher) FindByUIDs(ctx context.Context, uids []int64) ([]*user.Profile, error) {
-    var result []*user.Profile
-    for _, uid := range uids {
-        resp, err := f.client.GetUser(ctx, &pb.GetUserReq{Uid: uid})
-        if err != nil {
-            continue
-        }
-        result = append(result, toProfile(resp))
+// user/domain/user.go
+type User struct {
+    id               int64
+    status           Status
+    realNameVerified bool
+    streamer         bool
+}
+
+func (u *User) EnableStreamer() error {
+    if u.status == StatusBanned {
+        return ErrUserBanned
     }
-    return result, nil
+    if !u.realNameVerified {
+        return ErrRealNameRequired
+    }
+    u.streamer = true
+    return nil
 }
 ```
 
-两次需求演进各自的落点：后台入口要看到封禁状态而非过滤时，改动落在领域层——新增一个不做过滤的用例，或给过滤规则加参数，`FindByUIDs` 与 infra 实现都不动；对方升级为批量接口时，改动只落在 infra 这一个函数体——把循环换成一次批量调用，Port 签名不变，领域层与所有用例零改动。PR 里出现的是一个文件、一个函数体的变更，审查者只需确认新的批量调用语义与循环版本等价。
+用户模块的 application 负责加载和保存模型，其他模块看不到 `User` 的内部字段：
 
-### 4.3 差异总结
+```
+// user/application/streamer.go
+func (s *StreamerService) Enable(ctx context.Context, uid int64) error {
+    u, err := s.users.Find(ctx, uid)
+    if err != nil {
+        return err
+    }
+    if err := u.EnableStreamer(); err != nil {
+        return err
+    }
+    return s.users.Save(ctx, u)
+}
+```
 
-| 维度 | 无边界版本 | 分层版本 |
-|------|-----------|---------|
-| 第一次实现 | 所有逻辑堆在一个方法里 | 按 Port→infra→domain 分层 |
-| 新增变体 | 复制整段代码修改 | 新增用例，复用 Port |
-| 外部接口变更 | 每份复制都要改，漏改风险高 | 只改 infra 一处实现 |
-| PR 审查 | 多份相似代码逐一核对 | 一个文件、一个函数体变更 |
-| 编译护栏 | 无 | Port 未实现、字段未同步 → 本地构建失败 |
+跨模块用例只依赖各模块公开的能力：
 
-需要说明，"外部变化只改一处"本身是 Port 隔离的通用收益，对人工编码同样成立（完整论证见《DDD 的核心优势》第 3 章）。**Vibe Coding 语境下的增量在于**：无结构时 AI 更容易在当前改动点复制一个局部变体，复制件数量可能随会话次数增长，每次变更的漏改风险也随之放大；分层契约则让 `FindByUIDs` 成为可发现、可复用的现成能力，使复用比重新编写循环更自然。**约束改变的不是 AI 的能力，而是它的默认路径。**
+```
+// application/streamer_onboarding.go
+type UserModule interface {
+    EnableStreamer(ctx context.Context, uid int64) error
+}
+
+type AssetModule interface {
+    EnsureStreamerAccount(ctx context.Context, uid int64) error
+}
+
+type IMModule interface {
+    SendStreamerEnabled(ctx context.Context, uid int64) error
+}
+
+type LiveModule interface {
+    EnsureDefaultRoom(ctx context.Context, uid int64) error
+}
+
+type StreamerOnboarding struct {
+    users    UserModule
+    assets   AssetModule
+    messages IMModule
+    live     LiveModule
+}
+
+func (uc *StreamerOnboarding) Execute(ctx context.Context, uid int64) error {
+    if err := uc.users.EnableStreamer(ctx, uid); err != nil {
+        return err
+    }
+    if err := uc.assets.EnsureStreamerAccount(ctx, uid); err != nil {
+        return err
+    }
+    if err := uc.live.EnsureDefaultRoom(ctx, uid); err != nil {
+        return err
+    }
+    return uc.messages.SendStreamerEnabled(ctx, uid)
+}
+```
+
+这里的差别不是代码行数更少，而是每条规则都有明确归属：主播资格属于用户，结算账户属于资产，默认直播间属于直播，通知模板属于 IM 消息。AI 新增后台入口时，能够复用同一个 application 用例和领域方法；人工审核也可以分别检查业务规则与跨模块流程。
+
+示例省略了事务与消息可靠性。实际项目中，同库修改可以由 application 管理事务，IM 等外部副作用应在事务提交后执行，并根据可靠性要求采用 Outbox、重试或幂等处理。DDD 不会自动解决这些问题。
+
+### 4.3 需求变化时，修改和审核有什么不同
+
+| 需求变化 | 组合 A | 组合 C |
+|----------|--------|--------|
+| 增加“风险用户不能成为主播” | 修改应用服务，并检查其他入口是否复制过资格判断 | 修改 `User.EnableStreamer()` 及其领域测试，所有入口复用 |
+| 新增运营后台开通入口 | 必须确保新入口调用原应用服务，避免直接改状态 | 调用现有 application 用例，内部状态不能直接修改 |
+| IM 提供方升级协议 | 如果已有稳定接口，只改 IM 模块的适配实现；这不是 DDD 独有收益 | 修改 IM 模块的 infra，用户、资产和直播规则不动 |
+| 人工审核 | 同时检查应用服务中的规则、流程和跨模块调用 | 分开检查 domain 规则、application 流程和 infra 适配 |
+| 直播模块以后拆成服务 | 需要重新确认公开接口和调用方 | 现有模块接口提供候选拆分位置，但仍需补超时、重试、幂等和一致性处理 |
+
+组合 A 并不等于规则一定会散落；只要所有入口稳定复用应用服务，它仍然可以长期维护。组合 C 的额外价值是把“应该复用”进一步落实为模型状态不可直接修改、规则入口固定，以及每层都有明确的审核标准。
+
+### 4.4 本章结论
+
+对于只有少量 CRUD 的单一模块，组合 A 更简单。对于用户、资产、IM 消息、直播这类多个轻量业务模块组成的新项目，组合 C 能在不拆服务的前提下明确模型归属、规则入口和模块接口，也让 AI 生成与人工审核沿着同一套结构进行。
+
+这种结构不会保证业务实现一定正确，也不会消除未来拆服务时的分布式成本。它解决的是更具体的问题：当 Vibe Coding 持续生成新入口和新流程时，代码库能否明确告诉 AI“规则在哪里、应该调用什么”，并让审核者快速看出改动是否放对位置。
 
 ---
 
