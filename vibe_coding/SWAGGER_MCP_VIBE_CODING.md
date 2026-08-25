@@ -1,97 +1,141 @@
-# 在新项目中使用 Swagger MCP：让 API 文档成为 Vibe Coding 的实时上下文
+# 用 Swagger MCP 改善接口协作：让 API 契约成为 Vibe Coding 的可检索上下文
 
 ## 摘要
 
-新项目可以从一开始就把 Proto、后端代码或接口注释作为真相源，自动生成
-Swagger/OpenAPI，并通过 MCP 直接提供给 AI 编程工具。
+团队通常已经有 Swagger/OpenAPI，但 AI 编程时仍可能依赖开发者查找、复制和解释接口文档。
+Swagger MCP 提供了另一种方式：让 AI 按需查询接口路径、参数和 Schema，再根据实际契约生成
+或检查代码。
 
-开发者描述任务后，AI 可按需查询接口、请求参数和数据结构，无需人工复制整份文档。这样能
-减少重复维护、文档漂移和无关 Token 消耗，也让生成结果更容易验证。
+这套方案的主要收益是减少人工搬运和无关上下文，让接口依据更容易追踪；代价是增加了 MCP
+进程、文档地址、缓存和安全配置等依赖。它也不能修复错误的 Swagger，更不能替代业务说明、
+联调和测试。
 
-## 核心方案
+因此，讨论的重点不是“是否应该统一接入 MCP”，而是：当 Swagger/OpenAPI 已经足够可靠时，
+把它变成 AI 可检索的上下文是否值得。
 
-新项目的接口契约生产和使用链路如下：
+## 传统的后端与客户端协作为什么费力
+
+过去后端完成接口后，除了生成 Swagger/OpenAPI，往往还要整理 `API.md`、更新知识库并通知
+客户端。客户端拿到信息后，需要找到本次涉及的接口，确认路径、参数和字段，再转成自己的
+请求代码与类型。进入 AI 编程阶段后，这条链路还多了一步：把相关文档再次复制给 AI。
+
+一种常见的协作流程如下：
 
 ```text
-后端代码、Proto 或接口注释
-          ↓
-自动生成并部署 Swagger/OpenAPI
-          ↓
+后端代码 / Proto / 接口注释
+  ↓
+生成 Swagger/OpenAPI
+  ↓
+整理 API.md 或知识库文档
+  ↓
+通知客户端并解释变化
+  ↓
+客户端查找、确认并复制相关接口
+  ↓
+提供给 AI 编程工具
+  ↓
+生成或修改客户端代码
+```
+
+困难不只是步骤多，还在于每次转交都可能产生延迟和信息损失。接口已经更新，知识库可能尚未
+同步；字段表已经复制，客户端却难以确认它对应哪个版本；整份文档交给 AI，又会带入大量与
+当前任务无关的内容。后端和客户端因此反复确认同一份接口契约。
+
+## 接入 Swagger MCP 后的协作链路
+
+接口契约的生产和使用链路如下：
+
+```text
+OpenAPI 描述文件 / 代码 / Proto / 接口注释
+  ↓
+生成或发布 Swagger/OpenAPI
+  ↓
 Swagger Reader MCP（只读检索）
-          ↓
-Claude Code 等 AI 编程工具按需查询
-          ↓
+  ↓
+AI 编程工具按需查询
+  ↓
 生成或检查客户端代码
 ```
 
-这里的 MCP 只负责读取接口文档，不调用 Swagger 中描述的真实业务接口，也不需要在后端
-服务中增加新的业务 RPC。
+这里的 MCP 只读取接口文档，不调用文档中描述的业务接口，也不要求后端增加新的业务 RPC。
+以 `swagger-reader-mcp` 为例，它由 AI 客户端通过 `stdio` 启动，在本地下载并缓存指定的
+Swagger/OpenAPI JSON，再提供接口搜索、端点读取、Schema 读取和缓存刷新等工具。
 
-它通常由 Claude Code 在开发者本机通过 `stdio` 启动：
-
-1. MCP Server 从指定 URL 下载 Swagger/OpenAPI 文档。
-2. MCP Server 解析并缓存接口路径、Operation 和 Schema。
-3. Claude Code 根据任务调用检索工具。
-4. MCP Server 只返回当前任务需要的局部接口信息。
-
-## 为什么更利于 Vibe Coding
-
-接入 MCP 后，接口上下文不再主要依赖开发者查找和粘贴文档。开发者只需要描述目标，AI 就能
-先查询相关接口及 Schema，再根据实际契约编码。例如：
+开发者可以直接描述目标：
 
 ```text
 使用 api-docs 查询用户详情接口，根据实际契约实现请求函数和 TypeScript 类型。
 不要推测文档中不存在的字段。
 ```
 
-MCP 按接口路径、Operation ID、Schema 名或关键词返回局部内容，避免把无关接口一起放入
-上下文。调用本身仍会消耗 Token，但能减少重复粘贴整份文档造成的浪费。
+## 收益与代价
 
-接口变更后，重新生成并部署 Swagger/OpenAPI，客户端 AI 刷新缓存即可读取新契约。如果
-Swagger/OpenAPI 由约定的真相源自动生成，字段不一致的问题就主要收敛在生成链路中，无需
-同时检查多份手工副本。
+| 维度 | 可能的收益 | 需要承担的代价或边界 |
+|---|---|---|
+| 上下文 | AI 只读取当前任务涉及的端点和 Schema，减少整篇文档进入上下文 | MCP 调用仍消耗 Token，检索关键词不准确时也可能漏掉相关接口 |
+| 契约更新 | 文档发布后，刷新缓存即可查询新版本，无需重新复制字段表 | 依赖文档地址可访问、缓存及时刷新，以及生成和部署链路稳定 |
+| 一致性 | 减少 Swagger、Markdown 和知识库之间的字段副本 | 只能减少副本漂移，不能保证 Swagger 与真实实现一致 |
+| 可验证性 | AI 修改前后都能列出所依据的路径、Method 和 Schema | 验证的是“代码是否符合文档”，不能替代集成测试和真实请求 |
+| 团队协作 | 项目级配置可以共享 MCP 名称、地址和 package 版本 | 团队需要审查第三方 package、配置权限并处理本机运行环境 |
 
-AI 修改代码前可以先列出接口路径、HTTP Method、请求结构和响应 Schema，修改后再用同一份
-契约检查客户端实现。项目级 MCP 配置还可以随仓库共享，让团队使用相同的 MCP 名称、文档
-地址和 package 版本。
+这套方案没有消除接口协作成本，而是把问题从“人工复制是否正确”收敛到“接口契约是否可靠、
+MCP 是否能取得并准确检索它”。后者更容易自动化，但仍需要工程治理。
 
-## 建议使用项目级 MCP 配置
+## 先明确谁是真相源
 
-对于 Swagger/OpenAPI 这类与具体项目接口契约绑定的 MCP，建议优先使用**项目级配置**，
-将 `.mcp.json` 放在客户端项目根目录并提交到 Git。
+Swagger MCP 消费的是发布后的 Swagger/OpenAPI，但这份文档不一定是真相源。团队需要先明确
+接口采用哪种生产方式：
 
-不建议默认配置成用户级 MCP，主要原因是：
+| 方式 | 真相源 | Swagger/OpenAPI 的角色 |
+|---|---|---|
+| 设计优先 | OpenAPI 描述文件 | 作为接口契约，可用于生成服务端骨架、客户端、文档或校验规则 |
+| 代码优先 | 后端代码、Proto 或接口注释 | 从真相源自动生成的机器可读契约 |
 
-- **接口契约属于项目**：某个服务的 Swagger 地址通常只对对应客户端项目有意义。
-- **团队配置一致且可追踪**：MCP 名称、package 版本、Swagger 地址和缓存策略都可接受
-  代码审查。
-- **新成员开箱即用**：克隆项目后无需根据口头说明重复配置。
-- **避免跨项目污染**：只在需要这份接口契约的项目中启用对应能力。
+无论采用哪种方式，都应避免同时手工维护多份字段级契约。否则 MCP 只是更快地读取其中一份，
+无法解决不同副本之间的冲突。
 
-Claude Code 首次加载项目级 MCP 时会要求确认信任。团队成员可先审查配置，再决定是否
-启用。
-
-项目级配置中可以提交公开文档地址，但不要提交 Token、API Key 等敏感信息。需要鉴权时，
-应在 `.mcp.json` 中引用环境变量，由每位开发者在本机或安全的密钥系统中提供真实值。
-
-## 文档职责应该怎样划分
+## 文档职责如何划分
 
 | 文档载体 | 主要用途 | 适合承载的内容 | 不应重复维护的内容 |
 |---|---|---|---|
 | Swagger/OpenAPI | 机器可读的接口契约 | Method、路径、参数、请求与响应 Schema、字段类型、必填关系、枚举、格式、示例和标准错误响应 | 需求背景、跨接口业务流程和上线决策 |
 | 飞书、Confluence 等知识库 | 供团队理解和讨论业务 | 业务目标、页面交互、调用流程、影响范围、兼容策略、灰度计划、上线时间及尚未固化的决策 | 完整的路径、参数和字段表 |
-| 项目内的 `API.md`（可选） | 提供项目内的接口使用指引 | 模块能力概览、复杂调用示例、OpenAPI 难以完整表达的业务约束，以及 Swagger 地址或接口索引 | Swagger/OpenAPI 已经描述的字段级契约 |
+| 项目内的 `API.md`（可选） | 提供接口使用指引 | 模块能力概览、复杂调用示例、OpenAPI 难以表达的业务约束，以及 Swagger 地址或接口索引 | Swagger/OpenAPI 已经描述的字段级契约 |
 
-字段级契约只维护在能够生成 Swagger/OpenAPI 的真相源中。
+知识库中的接口变更说明可以写清业务背景、影响范围和升级要求；具体路径、参数和字段结构则
+回到 Swagger/OpenAPI 查询。
 
-## 配置示例：Claude Code + swagger-reader-mcp
+## 什么时候值得接入
 
-下面以开源 package `swagger-reader-mcp` 为例：
+当接口数量较多、变化频繁，Swagger/OpenAPI 能稳定生成和访问，而且团队经常使用 AI 开发或
+检查客户端代码时，MCP 的复用价值比较明显。它尤其适合一次任务只涉及少量端点、但完整接口
+文档很大的场景。
 
-- GitHub：[`Abdallahabusnineh/swagger-reader-mcp`](https://github.com/Abdallahabusnineh/swagger-reader-mcp)
-- Claude Code MCP 配置说明：[`Connect Claude Code to tools via MCP`](https://code.claude.com/docs/en/mcp)
+如果接口很少且长期稳定，Swagger 本身不完整，文档地址经常不可访问，或者团队很少让 AI
+处理接口代码，直接查看文档可能更简单。接入 MCP 不应早于接口契约质量建设。
 
-在需要使用接口文档的客户端项目根目录创建 `.mcp.json`，并将它提交到 Git：
+## 配置作用域
+
+Claude Code 支持 local、project 和 user 三种 MCP 作用域。选择哪一种取决于配置是否需要
+共享，而不是项目新旧：
+
+| 作用域 | 适合场景 | 是否随仓库共享 |
+|---|---|---|
+| local | 个人试用或包含本机专属配置 | 否 |
+| project | 团队共同使用同一份接口契约 | 是，写入项目根目录 `.mcp.json` |
+| user | 同一个人需要在多个项目中使用的通用工具 | 否 |
+
+对于与某个项目接口契约绑定的 MCP，通常优先考虑 project；试用阶段或配置包含个人地址时，
+local 更合适。Claude Code 在交互式会话中首次使用项目级 MCP 前会要求确认，团队仍需审查
+启动命令、package 来源和环境变量。
+
+## 配置示例
+
+下面以开源 package
+[`swagger-reader-mcp`](https://github.com/Abdallahabusnineh/swagger-reader-mcp) 为例。
+它当前要求 Node.js 20 或更高版本，并读取 Swagger 2 或 OpenAPI 3 的 JSON 地址。
+
+在项目根目录创建 `.mcp.json`：
 
 ```json
 {
@@ -99,10 +143,7 @@ Claude Code 首次加载项目级 MCP 时会要求确认信任。团队成员可
     "api-docs": {
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "-y",
-        "swagger-reader-mcp@0.1.4"
-      ],
+      "args": ["-y", "swagger-reader-mcp@0.1.4"],
       "env": {
         "SWAGGER_URL": "https://api.example.com/openapi.json",
         "SWAGGER_CACHE_TTL_MS": "180000"
@@ -112,134 +153,44 @@ Claude Code 首次加载项目级 MCP 时会要求确认信任。团队成员可
 }
 ```
 
-需要替换的内容：
+锁定 package 版本可以降低团队成员安装结果不一致的概率，但升级仍需检查变更并重新验证。
+公开文档地址可以提交；Token、API Key 等凭证不要写入仓库，需要鉴权时使用环境变量或团队
+认可的密钥管理方式。
 
-- `api-docs`：MCP Server 名称，可以按项目修改。
-- `SWAGGER_URL`：替换为团队实际可访问的 Swagger/OpenAPI JSON 地址。
-- package 版本：建议锁定明确版本，升级前再进行验证。
-- `SWAGGER_CACHE_TTL_MS`：缓存时间，示例中的 `180000` 表示 3 分钟。
+Claude Code 的项目级 MCP 配置方式和信任机制以
+[`Connect Claude Code to tools via MCP`](https://code.claude.com/docs/en/mcp) 为准。
+OpenAPI 能支持文档生成、校验、代码生成等自动化的背景，可参考
+[`OpenAPI Getting Started`](https://learn.openapis.org/)。
 
-直接填写文档 URL 最容易理解。如果开发者使用不同环境，可通过用户级配置或启动环境注入
-地址，避免把个人地址提交到共享配置。
+## 如何验证方案有效
 
-### CLI 一条命令安装
-
-在客户端项目根目录执行下面的命令。Claude Code 会创建或更新项目级 `.mcp.json`：
-
-```bash
-claude mcp add api-docs --transport stdio --scope project \
-  --env SWAGGER_URL=https://api.example.com/openapi.json \
-  --env SWAGGER_CACHE_TTL_MS=180000 \
-  -- npx -y swagger-reader-mcp@0.1.4
-```
-
-执行前将 `SWAGGER_URL` 替换为实际文档地址。`--scope project` 用于生成可供团队共享的
-项目级 `.mcp.json`，不要省略。
-
-安装后检查：
+配置写入成功不等于 MCP 已经可用。可以先查看配置和连接状态：
 
 ```bash
 claude mcp get api-docs
 ```
 
-### 让 AI 一键完成配置
-
-如果不希望手工编辑 JSON，也可以在 Claude Code 或其他能够修改项目文件的 AI 编程工具中，
-直接发送下面这段提示词：
-
-```text
-请在当前项目中配置项目级 Swagger Reader MCP。
-
-要求：
-1. 在项目根目录创建或更新 .mcp.json，不要写入用户级配置。
-2. 如果 .mcp.json 已存在，合并到现有 mcpServers，不要覆盖其他 MCP。
-3. Server 名称使用 api-docs，transport 使用 stdio。
-4. command 使用 npx，args 使用 ["-y", "swagger-reader-mcp@0.1.4"]。
-5. SWAGGER_URL 设置为：https://api.example.com/openapi.json
-6. SWAGGER_CACHE_TTL_MS 设置为 180000。
-7. 不要把 Token、API Key 或其他凭证写进仓库。
-8. 修改后校验 JSON 格式，并告诉我新增或修改了哪些内容。
-```
-
-使用前替换其中的 Swagger/OpenAPI 地址。修改后仍应检查 `.mcp.json` 差异，并在首次启动
-Claude Code 时确认信任提示。
-
-## 首次启用和验证
-
-本机需要安装 Node.js，并确保 `npx` 可用。具体 Node.js 版本以 package 当前要求为准。
-
-在包含 `.mcp.json` 的项目目录启动 Claude Code：
-
-```bash
-claude
-```
-
-首次读取项目级 MCP 配置时，Claude Code 会请求信任确认。批准后可以检查：
-
-```bash
-claude mcp get api-docs
-```
-
-在 Claude Code 的 `/mcp` 页面中，确认服务已连接，并能看到搜索接口、读取端点和 Schema、
-查看概览及刷新文档等工具。
-
-除确认配置已注册外，至少进行一次真实查询：
+随后在 Claude Code 中检查 `/mcp`，并进行一次真实查询：
 
 ```text
 使用 api-docs 查询一个已知接口，返回它的路径、Method、请求参数和响应 Schema。
 ```
 
-## 推荐的日常提示词
+只有当查询结果与当前 Swagger/OpenAPI 一致时，才能说明“配置、连接、文档访问和检索”这条
+链路真正可用。后续开发可以在编码前查询契约，在接口更新后刷新缓存，在修改完成后再次读取
+契约检查客户端实现。
 
-### 开发新功能
+## 协作方式
 
-```text
-先使用 api-docs 查询与用户登录有关的接口。
-列出实际路径、Method、请求参数和响应 Schema，再实现请求函数和类型。
-不要推测接口文档中不存在的字段。
-```
-
-### 后端刚更新接口
-
-```text
-先刷新 api-docs 的 Swagger 缓存，再重新查询订单详情接口。
-检查当前客户端类型和请求代码是否需要同步修改。
-```
-
-### 只分析、不修改代码
-
-```text
-使用 api-docs 读取目标接口及相关 Schema，对比当前客户端实现，
-列出路径、参数、可选字段和枚举值的不一致，暂时不要修改代码。
-```
-
-### 开发完成后检查
-
-```text
-重新读取本次涉及的接口契约，检查请求路径、Method、参数位置、
-TypeScript 类型和错误处理是否与文档一致。
-```
-
-检索时优先使用接口路径、Operation ID、Schema 名或单个明确关键词。过多中英文关键词
-可能降低部分检索器的命中率。
-
-## 落地与日常协作
-
-新项目先约定接口真相源和 Swagger/OpenAPI 的生成方式，部署稳定可访问的文档地址，再将
-项目级 `.mcp.json` 提交到客户端仓库。用一个真实接口完成查询验证后，即可作为团队的标准
-配置。
-
-接口更新时，后端只修改真相源并重新生成、部署 Swagger/OpenAPI，不直接修改生成产物。
-知识库记录业务背景、影响范围和升级要求，客户端刷新 MCP 缓存后按新契约对接。
-
-CI/CD 负责检查生成产物是否一致、格式和关键路由是否有效，以及部署后的文档地址是否可访问，
-避免依赖人工逐项确认。
+后端或 API 设计者负责维护真相源并发布可靠的 Swagger/OpenAPI；知识库记录业务背景、影响
+范围和升级要求；客户端通过 MCP 查询当前契约。CI/CD 可以进一步检查生成产物差异、格式、
+关键路由和文档地址可用性，真实接口行为仍由集成测试或契约测试验证。
 
 ## 结论
 
-Swagger MCP 的价值不是增加一种文档格式，而是让机器可读的接口契约成为 AI 可主动检索的
-开发上下文。
+Swagger MCP 的价值不是增加一种文档格式，也不是让 MCP 成为新的真相源，而是为 AI 提供一条
+按需读取现有机器契约的通道。
 
-后端负责从真相源生成并部署可靠的 Swagger/OpenAPI；知识库负责业务背景、流程和人工决策；
-MCP 负责把当前任务需要的接口契约交给 AI。这样可以减少重复维护和文档传播延迟，降低
-接口文档漂移的概率，也让 Vibe Coding 的输入更准确、更精简、更容易验证。
+当 Swagger/OpenAPI 可靠、更新及时且团队频繁使用 AI 处理接口代码时，它可以减少人工搬运、
+无关上下文和字段副本。反过来，如果契约本身不可靠，MCP 只会更快地传播错误。因此，这个
+方案是否值得采用，首先取决于接口契约质量，其次才是 MCP 的安装和使用成本。
