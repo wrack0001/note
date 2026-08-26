@@ -2,8 +2,7 @@
 
 ## 摘要
 
-团队通常已经有 Swagger/OpenAPI，但 AI 编程时仍依赖开发者查找、复制和解释接口文档。
-Swagger MCP 让 AI 直接查询接口路径、参数和 Schema，减少后端、客户端和 AI 之间反复整理、复制和确认文档的成本。
+团队通常已经有 Swagger/OpenAPI，但 AI 编程时仍依赖开发者查找、复制和解释接口文档。Swagger MCP 让 AI 直接查询接口路径、参数和 Schema，减少后端、客户端和 AI 之间反复整理、复制和确认文档的成本。
 
 > 本文基于开源项目 [`swagger-reader-mcp`](https://github.com/Abdallahabusnineh/swagger-reader-mcp) 整理，文中配置与用法均以此开源项目（GitHub 仓库 + npm 包）为准。
 
