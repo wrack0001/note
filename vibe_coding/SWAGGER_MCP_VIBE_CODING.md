@@ -5,7 +5,7 @@
 团队通常已经有 Swagger/OpenAPI，但 AI 编程时仍依赖开发者查找、复制和解释接口文档。
 Swagger MCP 让 AI 直接查询接口路径、参数和 Schema，减少后端、客户端和 AI 之间反复整理、复制和确认文档的成本。
 
-> 本文基于开源项目 [`swagger-reader-mcp`](https://github.com/Abdallahabusnineh/swagger-reader-mcp) 整理，文中配置与用法均以此仓库为准。
+> 本文基于开源项目 [`swagger-reader-mcp`](https://github.com/Abdallahabusnineh/swagger-reader-mcp) 整理，文中配置与用法均以此开源项目（GitHub 仓库 + npm 包）为准。
 
 ## 传统的后端与客户端协作为什么费力
 
@@ -49,7 +49,8 @@ AI 编程工具按需查询
 
 这里的 MCP 只读取接口文档，不调用文档中描述的业务接口，也不要求后端增加新的业务 RPC。
 以 `swagger-reader-mcp` 为例，它由 AI 客户端通过 `stdio` 启动，在本地下载并缓存指定的
-Swagger/OpenAPI JSON，再提供接口搜索、端点读取、Schema 读取和缓存刷新等工具。
+Swagger/OpenAPI JSON，再提供 `search_api`（接口搜索）、`get_endpoint`（端点详情）、
+`get_schema`（Schema 详情）、`get_api_overview`（API 概览）和 `refresh_api_spec`（刷新缓存）等只读工具。
 
 开发者可以直接描述目标：
 
@@ -97,13 +98,14 @@ Claude Code 支持 local、project 和 user 三种 MCP 作用域。选择哪一�
 local 更合适。Claude Code 在交互式会话中首次使用项目级 MCP 前会要求确认，团队仍需审查
 启动命令、package 来源和环境变量。
 
-## 配置示例
+## 客户端如何使用（AI 一键安装）
 
-下面以开源 package
-[`swagger-reader-mcp`](https://github.com/Abdallahabusnineh/swagger-reader-mcp) 为例。
-它当前要求 Node.js 20 或更高版本，并读取 Swagger 2 或 OpenAPI 3 的 JSON 地址。
+`swagger-reader-mcp` 通过 `npx` 运行，不需要你手动全局安装 npm 包。该包已发布在 npm（同名 `swagger-reader-mcp`），`npx` 直接从 npm registry 拉取预编译包，无需 clone 仓库源码。客户端以 stdio 方式拉起进程时，`npx -y` 会在首次运行时自动下载并缓存指定版本的 package，之后复用本地缓存。也就是说，安装由 AI 客户端“拉起即下载”，你不必单独执行 `npm install`。
 
-在项目根目录创建 `.mcp.json`：
+前提是本机已安装 **Node.js 20 或更高版本**（用 `node -v` 确认）。
+
+
+按下面「配置示例」把 `.mcp.json` 写入项目根目录。AI 客户端在会话中首次用到 project 级 MCP 时会提示确认，点“信任 / 允许”即可，没有额外的手动安装步骤。
 
 ```json
 {
@@ -121,68 +123,10 @@ local 更合适。Claude Code 在交互式会话中首次使用项目级 MCP 前
 }
 ```
 
-锁定 package 版本可以降低团队成员安装结果不一致的概率，但升级仍需检查变更并重新验证。
-公开文档地址可以提交；Token、API Key 等凭证不要写入仓库，需要鉴权时使用环境变量或团队
-认可的密钥管理方式。
-
-## 客户端如何安装（AI 一键安装）
-
-`swagger-reader-mcp` 通过 `npx` 运行，不需要你手动全局安装 npm 包。客户端以 stdio 方式拉起进程时，`npx -y` 会在首次运行时自动下载并缓存指定版本的 package，之后复用本地缓存。也就是说，安装由 AI 客户端“拉起即下载”，你不必单独执行 `npm install`。
-
-前提是本机已安装 **Node.js 20 或更高版本**（用 `node -v` 确认）。
-
-安装有两种等价路径：
-
-**方式一：写 `.mcp.json`，由客户端一键信任（推荐团队共享）**
-
-按上文「配置示例」把 `.mcp.json` 写入项目根目录。AI 客户端在会话中首次用到 project 级 MCP 时会提示确认，点“信任 / 允许”即可，没有额外的手动安装步骤。
-
-**方式二：直接让 AI 一键安装（适合个人快速试用）**
-
-不需要自己敲命令，把下面这句话发给 AI 客户端即可：
-
-```text
-帮我安装 swagger-reader-mcp，注册成名为 api-docs 的 MCP，
-Swagger 地址用 https://api.example.com/openapi.json，缓存 3 分钟。
-```
-
-AI 客户端会自动生成等价的配置并拉起进程。如果客户端支持命令行，也可以直接执行：
-
-```bash
-claude mcp add api-docs --transport stdio \
-  --env SWAGGER_URL=https://api.example.com/openapi.json \
-  --env SWAGGER_CACHE_TTL_MS=180000 \
-  -- npx -y swagger-reader-mcp@0.1.4
-```
-
-装好之后，用「如何验证方案有效」里的命令确认连接状态。
-
-## 如何验证方案有效
-
-配置写入成功不等于 MCP 已经可用。可以先查看配置和连接状态：
-
-```bash
-claude mcp get api-docs
-```
-
-随后在 Claude Code 中检查 `/mcp`，并进行一次真实查询：
-
-```text
-使用 api-docs 查询一个已知接口，返回它的路径、Method、请求参数和响应 Schema。
-```
-
-只有当查询结果与当前 Swagger/OpenAPI 一致时，才能说明“配置、连接、文档访问和检索”这条
-链路真正可用。后续开发可以在编码前查询契约，在接口更新后刷新缓存，在修改完成后再次读取
-契约检查客户端实现。
-
 ## 协作方式
 
-后端或 API 设计者负责维护真相源并发布可靠的 Swagger/OpenAPI；知识库记录业务背景、影响
-范围和升级要求；客户端通过 MCP 查询当前契约。CI/CD 可以进一步检查生成产物差异、格式、
-关键路由和文档地址可用性，真实接口行为仍由集成测试或契约测试验证。
+后端或 API 设计者负责维护真相源并发布可靠的 Swagger/OpenAPI；知识库记录业务背景、影响范围和升级要求；客户端通过 MCP 查询当前契约。CI/CD 可以进一步检查生成产物差异、格式、关键路由和文档地址可用性，真实接口行为仍由集成测试或契约测试验证。
 
 ## 结论
 
-Swagger MCP 把可靠的 Swagger/OpenAPI 变成 AI 可主动检索的开发上下文。后端发布接口契约，
-客户端和 AI 按需读取同一份内容，从而减少人工搬运、无关上下文和字段副本，让接口协作更
-直接，也让 Vibe Coding 的输入更准确、更容易验证。
+Swagger MCP 把可靠的 Swagger/OpenAPI 变成 AI 可主动检索的开发上下文。后端发布接口契约，客户端和 AI 按需读取同一份内容，从而减少人工搬运、无关上下文和字段副本，让接口协作更直接，也让 Vibe Coding 的输入更准确、更容易验证。
