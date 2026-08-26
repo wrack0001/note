@@ -5,6 +5,8 @@
 团队通常已经有 Swagger/OpenAPI，但 AI 编程时仍依赖开发者查找、复制和解释接口文档。
 Swagger MCP 让 AI 直接查询接口路径、参数和 Schema，减少后端、客户端和 AI 之间反复整理、复制和确认文档的成本。
 
+> 本文基于开源项目 [`swagger-reader-mcp`](https://github.com/Abdallahabusnineh/swagger-reader-mcp) 整理，文中配置与用法均以此仓库为准。
+
 ## 传统的后端与客户端协作为什么费力
 
 过去后端完成接口后，除了生成 Swagger/OpenAPI，往往还要整理 `API.md`、更新知识库并通知客户端。客户端拿到信息后，需要找到本次涉及的接口，确认路径、参数和字段，再转成自己的请求代码与类型。进入 AI 编程阶段后，这条链路还多了一步：把相关文档再次复制给 AI。
@@ -123,10 +125,37 @@ local 更合适。Claude Code 在交互式会话中首次使用项目级 MCP 前
 公开文档地址可以提交；Token、API Key 等凭证不要写入仓库，需要鉴权时使用环境变量或团队
 认可的密钥管理方式。
 
-Claude Code 的项目级 MCP 配置方式和信任机制以
-[`Connect Claude Code to tools via MCP`](https://code.claude.com/docs/en/mcp) 为准。
-OpenAPI 能支持文档生成、校验、代码生成等自动化的背景，可参考
-[`OpenAPI Getting Started`](https://learn.openapis.org/)。
+## 客户端如何安装（AI 一键安装）
+
+`swagger-reader-mcp` 通过 `npx` 运行，不需要你手动全局安装 npm 包。客户端以 stdio 方式拉起进程时，`npx -y` 会在首次运行时自动下载并缓存指定版本的 package，之后复用本地缓存。也就是说，安装由 AI 客户端“拉起即下载”，你不必单独执行 `npm install`。
+
+前提是本机已安装 **Node.js 20 或更高版本**（用 `node -v` 确认）。
+
+安装有两种等价路径：
+
+**方式一：写 `.mcp.json`，由客户端一键信任（推荐团队共享）**
+
+按上文「配置示例」把 `.mcp.json` 写入项目根目录。AI 客户端在会话中首次用到 project 级 MCP 时会提示确认，点“信任 / 允许”即可，没有额外的手动安装步骤。
+
+**方式二：直接让 AI 一键安装（适合个人快速试用）**
+
+不需要自己敲命令，把下面这句话发给 AI 客户端即可：
+
+```text
+帮我安装 swagger-reader-mcp，注册成名为 api-docs 的 MCP，
+Swagger 地址用 https://api.example.com/openapi.json，缓存 3 分钟。
+```
+
+AI 客户端会自动生成等价的配置并拉起进程。如果客户端支持命令行，也可以直接执行：
+
+```bash
+claude mcp add api-docs --transport stdio \
+  --env SWAGGER_URL=https://api.example.com/openapi.json \
+  --env SWAGGER_CACHE_TTL_MS=180000 \
+  -- npx -y swagger-reader-mcp@0.1.4
+```
+
+装好之后，用「如何验证方案有效」里的命令确认连接状态。
 
 ## 如何验证方案有效
 
